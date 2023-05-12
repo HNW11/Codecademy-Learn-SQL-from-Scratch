@@ -1,0 +1,108 @@
+SELECT * 
+FROM stream
+LIMIT 20;
+
+-- Time, device_id, login, channel, country, player, game
+
+SELECT * 
+FROM chat
+LIMIT 20;
+
+-- Time, device_id, login, channel, country, player, game, stream_format, subscriber
+
+SELECT DISTINCT game
+FROM stream;
+
+--19 distinct games AND one null
+
+SELECT *
+FROM stream
+WHERE game is NULL;
+
+--When game is null game, stream_format and subscriber is also null (one subscriber is false)
+
+SELECT DISTINCT channel
+from stream;
+
+--10 distinct channels 
+
+SELECT game, COUNT(*)
+FROM stream
+GROUP BY game
+ORDER BY COUNT(*) DESC;
+
+--League of Legends is the most popular by far more than double Dota 2 which is the second most popular.  Counter-Striker: Global Offensive is 3rd. 
+
+SELECT country, COUNT(*)
+FROM stream
+WHERE game = 'League of Legends'
+GROUP BY country
+ORDER BY COUNT(*) DESC;
+
+--The Country with the highest count is 447 in the US the next is DE at 66, CA is 3rd at 64. There is 49 countries which are Null I am going to investigate that before going to the next suggested step. 
+
+SELECT * 
+FROM stream
+WHERE country is NULL
+LIMIT 15;
+
+--There is no real pattern with the Nulls here like the game nulls.  There are quite a few that are null in other sections as well. 
+
+SELECT player, COUNT(*)
+FROM stream
+GROUP BY player
+ORDER BY COUNT(*) DESC;
+
+--site is the highest count (1365) with double the next highest iphone_t(622). The 3rd highest is android(547). There are no nulls which would make sense since they have to be able to access the stream with some form of device. 
+
+SELECT game, 
+  CASE
+    WHEN game = 'League of Legends'
+      Then 'MOBA'
+    WHEN game = 'Dota 2'
+      THEN 'MOBA'
+    WHEN game = 'Heros of the Storm'
+      THEN 'MOBA'
+    WHEN game = 'Counter-Strike: Global Offensive'
+      THEN 'FPS'
+    WHEN game = 'DayZ'
+      THEN 'Survival'
+    WHEN game = 'ARK: Survival Evolved'
+      THEN 'Survival'
+    ELSE 'Other'
+    END AS 'genre',
+    COUNT(*)
+FROM stream
+GROUP BY game
+ORDER BY COUNT(*) DESC;
+
+--MOBA games take the top 1500 plays the next highest is FPS with 302. 
+
+SELECT time 
+FROM stream
+LIMIT 10;
+
+SELECT time,
+    strftime('%S', time)
+FROM stream
+GROUP BY time
+LIMIT 20;
+
+--This pulled the seconds into their own column
+
+SELECT time,
+  strftime('%H', time) as hour,
+  COUNT(*)
+FROM stream
+WHERE country = 'US'
+GROUP BY hour;
+
+--The hour with the largest count is 21 with 120. 2nd is 20 with 102. 3rd is 22 with 71. 
+
+SELECT *
+FROM stream
+JOIN chat 
+  ON stream.device_id = chat.device_id
+LIMIT 10;
+
+--Overall the most popular game is LoL and the most popular method of accessing the game is from the website. 
